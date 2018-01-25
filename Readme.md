@@ -1,7 +1,7 @@
 # Личный проект «Кекстаграм» [![Build status][travis-image]][travis-url]
 
 * Студент: [Елена Градович](https://up.htmlacademy.ru/javascript/12/user/425039).
-* Наставник: `Неизвестно`.
+* Наставник: `Без наставника`.
 
 ---
 
