@@ -17,12 +17,12 @@ var createPictureObject = function (number) {
   return {
     'url': 'photos/' + (number + 1) + '.jpg',
     'likes': getRandom(minAmountLikes, maxAmountLikes),
-    'comments': availableComments[getRandom(0, availableComments.length)]
+    'comments': availableComments[getRandom(0, availableComments.length)],
+    'data': number
   };
 };
 
 var arrayPicturesObjects = [];
-
 for (var i = 0; i < maxAmountPictures; i++) {
   arrayPicturesObjects.push(createPictureObject(i));
 }
@@ -30,26 +30,175 @@ for (var i = 0; i < maxAmountPictures; i++) {
 var pictureTemplate = document.querySelector('#picture-template').content; // шаблон для клонирования
 var pictureInsert = document.querySelector('.pictures');
 
-var createPictureDOMElement = function (picture) {
+var createPictureDOMElement = function (picture, index) {
   var pictureElement = pictureTemplate.cloneNode(true);
   pictureElement.querySelector('img').src = picture.url;
   pictureElement.querySelector('.picture-likes').textContent = picture.likes;
   pictureElement.querySelector('.picture-comments').textContent = picture.comments;
+  pictureElement.querySelector('img').setAttribute('data', index);
 
   return pictureElement;
 };
 
 var fragmentForPicture = document.createDocumentFragment(); // фрагмент, состоящий из наполненных клонов шаблона
 for (i = 0; i < maxAmountPictures; i++) {
-  fragmentForPicture.appendChild(createPictureDOMElement(arrayPicturesObjects[i]));
+  fragmentForPicture.appendChild(createPictureDOMElement(arrayPicturesObjects[i], i));
 }
 
 pictureInsert.appendChild(fragmentForPicture);
+
+// Загрузка изображения и показ формы редактирования
+var uploadPopup = document.querySelector('.upload-overlay');
+var uploadFileForm = document.querySelector('#upload-file');
+var uploadCloser = document.querySelector('.upload-form-cancel');
+var uploadFormDescription = document.querySelector('.upload-form-description');
+
+var openUploadPopup = function () {
+  uploadPopup.classList.remove('hidden');
+  document.addEventListener('keydown', uploadPopupCloseEscHandler);
+};
+
+var closeUploadPopup = function () {
+  uploadPopup.classList.add('hidden');
+};
+
+var uploadPopupCloseEscHandler = function (evt) {
+  if (evt.keyCode === ESC_KEYCODE) {
+    if (document.activeElement !== uploadFormDescription) {
+      closeUploadPopup();
+    }
+  }
+};
+
+uploadFileForm.addEventListener('change', function () {
+  openUploadPopup();
+});
+
+uploadCloser.addEventListener('click', function () {
+  document.querySelector('#upload-file').value = '';
+  closeUploadPopup();
+  document.removeEventListener('keydown', uploadPopupCloseEscHandler);
+});
+
+
+// Показ изображения в полноэкранном режиме
+var pictures = document.querySelectorAll('.picture');
+var ESC_KEYCODE = 27;
+var ENTER_KEYCODE = 13;
 var picturesGallery = document.querySelector('.gallery-overlay');
+var picturesGalleryCloser = picturesGallery.querySelector('.gallery-overlay-close');
+
+var pictureCloseEscHandler = function (evt) {
+  if (evt.keyCode === ESC_KEYCODE) {
+    closePicturePopup();
+  }
+};
+
+var closePicturePopup = function () {
+  picturesGallery.classList.add('hidden');
+  document.removeEventListener('keydown', pictureCloseEscHandler);
+};
+
+var openPicturePopup = function (evt) {
+  evt.preventDefault();
+  var pictureIndex = parseInt(evt.currentTarget.querySelector('img').getAttribute('data'), 10);
+  picturesGallery.querySelector('.gallery-overlay-image').src = arrayPicturesObjects[pictureIndex].url;
+  picturesGallery.querySelector('.likes-count').textContent = arrayPicturesObjects[pictureIndex].likes;
+  picturesGallery.querySelector('.comments-count').textContent = arrayPicturesObjects[pictureIndex].comments;
+  picturesGallery.classList.remove('hidden');
+
+  document.addEventListener('keydown', pictureCloseEscHandler);
+};
+
+for (i = 0; i < pictures.length; i++) {
+  pictures[i].addEventListener('click', function (evt) {
+    openPicturePopup(evt);
+  });
+
+  pictures[i].addEventListener('keydown', function (evt) {
+    if (evt.keyCode === ENTER_KEYCODE) {
+      openPicturePopup();
+    }
+  });
+}
+
+picturesGalleryCloser.addEventListener('click', function () {
+  closePicturePopup();
+});
+
+// Применение эффекта для изображения и Редактирование размера изображения
+// Изменение масштаба изображения
+
+var resizeControls = document.querySelector('.upload-resize-controls');
+var declineControlPictureSize = resizeControls.querySelector('.upload-resize-controls-button-dec');
+var increaseControlPictureSize = resizeControls.querySelector('.upload-resize-controls-button-inc');
+var controlPicturePreviewValue = resizeControls.querySelector('.upload-resize-controls-value');
+var picturePreview = document.querySelector('.upload-form-preview');
+var pictureSizeValue = 100;
+
+var changePictureSize = function () {
+  controlPicturePreviewValue.setAttribute('value', pictureSizeValue + '%');
+  picturePreview.setAttribute('style', 'transform: scale(' + pictureSizeValue / 100 + ')');
+};
+
+increaseControlPictureSize.addEventListener('click', function () {
+  if (pictureSizeValue < 100) {
+    pictureSizeValue += 25;
+  }
+  changePictureSize();
+});
+
+declineControlPictureSize.addEventListener('click', function () {
+  if (pictureSizeValue > 25) {
+    pictureSizeValue -= 25;
+  }
+  changePictureSize();
+});
+
+// Наложение эффекта на изображение
+
+var uploadEffectControls = document.querySelector('.upload-effect-controls');
+var uploadEffectOriginal = uploadEffectControls.querySelector('#upload-effect-none');
+var uploadEffectChrome = uploadEffectControls.querySelector('#upload-effect-chrome');
+var uploadEffectSepia = uploadEffectControls.querySelector('#upload-effect-sepia');
+var uploadEffectMarvin = uploadEffectControls.querySelector('#upload-effect-marvin');
+var uploadEffectPhobos = uploadEffectControls.querySelector('#upload-effect-phobos');
+var uploadEffectHeat = uploadEffectControls.querySelector('#upload-effect-heat');
+var picturePreviewImage = picturePreview.querySelector('img');
+var picturePreviewClass = picturePreviewImage.getAttribute('class');
+var uploadEffectControlsValue = uploadEffectControls.querySelector('.upload-effect-level');
+
+var setUploadEffectHandler = function (effect) {
+  uploadEffectControlsValue.removeAttribute('hidden');
+  picturePreview.querySelector('img').setAttribute('class', '');
+  picturePreview.querySelector('img').setAttribute('class', picturePreviewClass);
+  picturePreview.querySelector('img').classList.add(effect);
+};
+
+uploadEffectChrome.addEventListener('click', function () {
+  setUploadEffectHandler('effect-chrome');
+});
+
+uploadEffectSepia.addEventListener('click', function () {
+  setUploadEffectHandler('effect-sepia');
+});
+
+uploadEffectMarvin.addEventListener('click', function () {
+  setUploadEffectHandler('effect-marvin');
+});
+
+uploadEffectPhobos.addEventListener('click', function () {
+  setUploadEffectHandler('effect-phobos');
+});
+
+uploadEffectHeat.addEventListener('click', function () {
+  setUploadEffectHandler('effect-heat');
+});
+
+uploadEffectOriginal.addEventListener('click', function () {
+  uploadEffectControlsValue.hidden = true;
+  picturePreview.querySelector('img').setAttribute('class', '');
+  picturePreview.querySelector('img').setAttribute('class', picturePreviewClass);
+});
 
 
-picturesGallery.querySelector('.gallery-overlay-image').src = arrayPicturesObjects[0].url;
-picturesGallery.querySelector('.likes-count').textContent = arrayPicturesObjects[0].likes;
-picturesGallery.querySelector('.comments-count').textContent = arrayPicturesObjects[0].comments;
-
-picturesGallery.classList.remove('hidden');
