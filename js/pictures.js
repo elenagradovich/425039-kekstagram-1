@@ -201,4 +201,57 @@ uploadEffectOriginal.addEventListener('click', function () {
   picturePreview.querySelector('img').setAttribute('class', picturePreviewClass);
 });
 
+// Валидация хэштэгов
 
+var inputHashtags = document.querySelector('.upload-form-hashtags');
+
+var checkRepetitiveHashtags = function (arrayHashtags) {
+  for (i = 0; i < arrayHashtags.length - 2; i++) {
+    var element = arrayHashtags[i];
+    var value = arrayHashtags.indexOf(element, (i + 1));
+    if (value !== -1) {
+      return true;
+    }
+  }
+  return false;
+};
+
+var checkHashtagHandler = function (evt) {
+  var target = evt.target;
+  var hashtags = target.value.toLowerCase();
+  var hashtagsArray = hashtags.split(' ');
+
+  inputHashtags.setCustomValidity('');
+  var hashtagCount = hashtagsArray.length;
+  var isError = false;
+  for (var j = 0; j < hashtagCount; j++) {
+    var hashtag = hashtagsArray[j];
+    if (hashtag.length === 0) {
+      hashtagsArray.splice(j, 1);
+      j--;
+      hashtagCount--;
+      continue;
+    }
+    if (hashtag.length > 20) {
+      target.setCustomValidity('Максимальная длина хэштэга 20 символов');
+      isError = true;
+      break;
+    } else if (hashtag[0] !== '#') {
+      target.setCustomValidity('Хэштэг должен начинаться с символа #');
+      isError = true;
+      break;
+    } else {
+      target.setCustomValidity('');
+      isError = false;
+    }
+  }
+  if (!isError) {
+    if (checkRepetitiveHashtags(hashtagsArray)) {
+      target.setCustomValidity('Поле содержит повторяющиеся хэштэги');
+    } else if (hashtagCount > 5) {
+      target.setCustomValidity('Укажите не больше 5 хэштэгов');
+    }
+  }
+};
+
+inputHashtags.addEventListener('input', checkHashtagHandler);
