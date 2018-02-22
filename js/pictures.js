@@ -201,6 +201,8 @@ uploadEffectOriginal.addEventListener('click', function () {
   picturePreview.querySelector('img').setAttribute('class', picturePreviewClass);
 });
 
+
+
 // Валидация хэштэгов
 
 var inputHashtags = document.querySelector('.upload-form-hashtags');
@@ -214,6 +216,11 @@ var checkRepetitiveHashtags = function (arrayHashtags) {
     }
   }
   return false;
+};
+
+var checkError = function (comment) {
+  inputHashtags.setAttribute('style', 'border: 2px solid red');
+  inputHashtags.setCustomValidity(comment);
 };
 
 var checkHashtagHandler = function (evt) {
@@ -233,23 +240,26 @@ var checkHashtagHandler = function (evt) {
       continue;
     }
     if (hashtag.length > 20) {
-      target.setCustomValidity('Максимальная длина хэштэга 20 символов');
+      checkError('Максимальная длина хэштэга 20 символов');
       isError = true;
       break;
     } else if (hashtag[0] !== '#') {
-      target.setCustomValidity('Хэштэг должен начинаться с символа #');
+      checkError('Хэштэг должен начинаться с символа #');
       isError = true;
       break;
     } else {
+      inputHashtags.removeAttribute('style', 'border: 2px solid red');
       target.setCustomValidity('');
       isError = false;
     }
   }
   if (!isError) {
     if (checkRepetitiveHashtags(hashtagsArray)) {
-      target.setCustomValidity('Поле содержит повторяющиеся хэштэги');
+      checkError('Поле содержит повторяющиеся хэштэги');
     } else if (hashtagCount > 5) {
-      target.setCustomValidity('Укажите не больше 5 хэштэгов');
+      checkError('Укажите не больше 5 хэштэгов');
+    } else if (inputHashtags.value === '') {
+      inputHashtags.removeAttribute('style', 'border: 2px solid red');
     }
   }
 };
