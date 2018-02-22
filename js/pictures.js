@@ -201,8 +201,6 @@ uploadEffectOriginal.addEventListener('click', function () {
   picturePreview.querySelector('img').setAttribute('class', picturePreviewClass);
 });
 
-
-
 // Валидация хэштэгов
 
 var inputHashtags = document.querySelector('.upload-form-hashtags');
