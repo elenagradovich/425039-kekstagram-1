@@ -1,4 +1,5 @@
-'use strict'; // Модуль, который работает с формой редактирования изображения
+'use strict';
+// Модуль, который работает с формой редактирования изображения
 (function () {
 
   // Загрузка изображения и показ формы редактирования
@@ -6,11 +7,31 @@
   var uploadFileForm = document.querySelector('#upload-file');
   var uploadCloser = document.querySelector('.upload-form-cancel');
   var uploadFormDescription = document.querySelector('.upload-form-description');
+  var picturePreview = document.querySelector('.upload-form-preview');
+  var pictureEffectPreviews = document.querySelectorAll('.upload-effect-preview');
+  var picturePreviewImage = picturePreview.querySelector('img');
 
-  var openUploadPopup = function () { // Добавить fileName
-    //picturePreview.querySelector('img').setAttribute('src', fileName)
+  var openUploadPopup = function (e) {
+    var file = e.target.files[0];
+    var readerFile = new FileReader();
+
+    readerFile.addEventListener('loadend', function () {
+      picturePreviewImage.src = readerFile.result;
+      for (var i = 0; i < pictureEffectPreviews.length; i++) {
+        pictureEffectPreviews[i].style.backgroundImage = 'url(' + readerFile.result + ')';
+      }
+    });
+
+    if (file) {
+      readerFile.readAsDataURL(file);
+
+    } else {
+      picturePreviewImage.src = '';
+    }
+
     uploadPopup.classList.remove('hidden');
     document.addEventListener('keydown', uploadPopupCloseEscHandler);
+    return picturePreviewImage;
   };
 
   var closeUploadPopup = function () {
@@ -27,8 +48,8 @@
     }
   };
 
-  uploadFileForm.addEventListener('change', function () {
-    openUploadPopup(uploadFileForm.value);
+  uploadFileForm.addEventListener('change', function (evt) {
+    openUploadPopup(evt);
   });
 
   uploadCloser.addEventListener('click', function () {
@@ -37,13 +58,13 @@
     document.removeEventListener('keydown', uploadPopupCloseEscHandler);
   });
 
-  //Редактирование размера изображения
+  // Редактирование размера изображения
 
   var resizeControls = document.querySelector('.upload-resize-controls');
   var declineControlPictureSize = resizeControls.querySelector('.upload-resize-controls-button-dec');
   var increaseControlPictureSize = resizeControls.querySelector('.upload-resize-controls-button-inc');
   var controlPicturePreviewValue = resizeControls.querySelector('.upload-resize-controls-value');
-  var picturePreview = document.querySelector('.upload-form-preview');
+
   var pictureSizeValue = 100;
   var maxPictureSize = 100;
   var minPictureSize = 25;
@@ -71,7 +92,6 @@
   // Изменение глубины эффекта перетаскиванием бегунка слайдера
 
   var uploadEffectControls = document.querySelectorAll('.upload-effect-controls > input');
-  var picturePreviewImage = picturePreview.querySelector('img');
   var picturePreviewClass = picturePreviewImage.getAttribute('class');
   var uploadEffectControlsValue = document.querySelector('.upload-effect-level');
   var effectLevelLine = uploadEffectControlsValue.querySelector('.upload-effect-level-line');
@@ -106,19 +126,20 @@
     }
   };
 
-  var changePreviewClass = function(){
+  var changePreviewClass = function () {
     picturePreview.querySelector('img').setAttribute('class', '');
     picturePreview.querySelector('img').setAttribute('class', picturePreviewClass);
   };
 
-  var resetEffect = function() {
+  var resetEffect = function () {
     uploadEffectControlsValue.hidden = true;
     picturePreviewImage.removeAttribute('style');
   };
   var setUploadEffectHandler = function (effect) {
     changePreviewClass();
     if (effect !== 'effect-none') {
-      picturePreviewImage.style.filter = imagePreviewProperties[effect].effect + '(' + imagePreviewProperties[effect].max + imagePreviewProperties[effect].unit+ ')';
+      picturePreviewImage.style.filter = imagePreviewProperties[effect].effect +
+       '(' + imagePreviewProperties[effect].max + imagePreviewProperties[effect].unit + ')';
       uploadEffectControlsValue.removeAttribute('hidden');
       effectLevelPin.style.left = '100%';
       effectLevelValue.style.width = '100%';
@@ -145,28 +166,26 @@
   };
 
   var mouseMoveHandler = function (evtMove) {
-    var lineEffectCoords = effectLevelLine.getBoundingClientRect();
     evtMove.preventDefault();
     if (evtMove.clientX >= lineEffectCoords.left && evtMove.clientX <= lineEffectCoords.right) {
       var shift = (evtMove.clientX - lineEffectCoords.left) * 100 / (lineEffectCoords.right - lineEffectCoords.left);
-      effectLevelPin.style.left = shift  + '%';
-      effectLevelValue.style.width = shift  + '%';
+      effectLevelPin.style.left = shift + '%';
+      effectLevelValue.style.width = shift + '%';
       applyEffectLevelPreviewPicture(shift / 100);
     }
   };
 
   var mouseUpHandler = function (evtUp) {
-        evtUp.preventDefault();
-        document.removeEventListener('mousemove', mouseMoveHandler);
-        document.removeEventListener('mouseup', mouseUpHandler);
-      };
+    evtUp.preventDefault();
+    document.removeEventListener('mousemove', mouseMoveHandler);
+    document.removeEventListener('mouseup', mouseUpHandler);
+  };
 
   effectLevelPin.addEventListener('mousedown', function (evt) {
     evt.preventDefault();
     document.addEventListener('mousemove', mouseMoveHandler);
     document.addEventListener('mouseup', mouseUpHandler);
-    }
-  );
+  });
 
   effectLevelLine.addEventListener('mousedown', function (evt) {
     evt.preventDefault();
@@ -208,7 +227,7 @@
         continue;
       }
       if (hashtag.length > maxHashtagLength) {
-        target.setCustomValidity('Максимальная длина хэштэга ' + maxHashtagLength +' символов');
+        target.setCustomValidity('Максимальная длина хэштэга ' + maxHashtagLength + ' символов');
         isError = true;
         break;
       } else if (hashtag[0] !== '#') {
@@ -224,7 +243,7 @@
       if (checkRepetitiveHashtags(hashtagsArray)) {
         target.setCustomValidity('Поле содержит повторяющиеся хэштэги');
       } else if (hashtagCount > maxHashtagsAmount) {
-        target.setCustomValidity('Укажите не больше '+ maxHashtagsAmount +' хэштэгов');
+        target.setCustomValidity('Укажите не больше ' + maxHashtagsAmount + ' хэштэгов');
       }
     }
   };

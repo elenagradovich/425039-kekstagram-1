@@ -2,7 +2,7 @@
 
 // Модуль, который создает данные
 (function () {
-  var maxAmountPictures =  25;
+  var maxAmountPictures = 25;
   var minAmountLikes = 15;
   var maxAmountLikes = 200;
   var availableComments = ['Всё отлично!', 'В целом всё неплохо. Но не всё.',
@@ -34,5 +34,5 @@
     ENTER_KEYCODE: 13,
     amountPictures: maxAmountPictures,
     picturesPreviews: arrayPicturesObjects
-  }
+  };
 })()

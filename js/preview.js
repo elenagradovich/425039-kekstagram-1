@@ -1,7 +1,6 @@
 'use strict';
+// Модуль для отрисовки изображения в полноэкранном режиме
 (function () {
-
-  // Модуль для отрисовки изображения в полноэкранном режиме
 
   var pictures = document.querySelectorAll('.picture');
   var picturesGallery = document.querySelector('.gallery-overlay');
