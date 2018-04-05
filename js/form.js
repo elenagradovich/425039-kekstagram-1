@@ -249,4 +249,17 @@
   };
 
   inputHashtags.addEventListener('input', checkHashtagHandler);
-})()
+
+  // Описание отправки данных на сервер
+  var uploadForm = document.querySelector('.upload-form');
+
+  var saveFormData = function () {
+    uploadForm.reset();
+    closeUploadPopup();
+  };
+
+  uploadForm.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    window.backend.save(new FormData(uploadForm), saveFormData, window.date.onError);
+  });
+})();

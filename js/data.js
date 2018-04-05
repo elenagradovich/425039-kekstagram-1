@@ -1,7 +1,27 @@
 'use strict';
 
-// Модуль, который создает данные
 (function () {
+  window.date = {
+    ESC_KEYCODE: 27,
+    ENTER_KEYCODE: 13,
+    onError: function (message) {
+      var node = document.createElement('div');
+      node.style = 'z-index: 100; margin: 0 auto; text-align: center; background-color: white; border: 10px solid red;';
+      node.style.position = 'absolute';
+      node.style.left = 0;
+      node.style.right = 0;
+      node.style.fontSize = '30px';
+      node.textContent = message;
+      document.body.insertAdjacentElement('afterbegin', node);
+    }
+  };
+  var onLoad = function (data) {
+    window.gallery(data);
+  };
+
+  window.backend.load(onLoad, window.date.onError);
+  /*
+  // Модуль, который создает данные
   var maxAmountPictures = 25;
   var minAmountLikes = 15;
   var maxAmountLikes = 200;
@@ -34,5 +54,6 @@
     ENTER_KEYCODE: 13,
     amountPictures: maxAmountPictures,
     picturesPreviews: arrayPicturesObjects
-  };
-})()
+  };*/
+
+})();
