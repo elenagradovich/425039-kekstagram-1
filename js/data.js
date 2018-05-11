@@ -1,6 +1,13 @@
 'use strict';
 
 (function () {
+  var onLoad = function (data) {
+    window.serverData = data;
+    window.galleryRender(data);
+    var imageFilters = document.querySelector('.filters');
+    imageFilters.classList.remove('filters-inactive');
+  };
+
   window.date = {
     ESC_KEYCODE: 27,
     ENTER_KEYCODE: 13,
@@ -15,10 +22,6 @@
       document.body.insertAdjacentElement('afterbegin', node);
     }
   };
-  var onLoad = function (data) {
-    window.gallery(data);
-  };
-
   window.backend.load(onLoad, window.date.onError);
   /*
   // Модуль, который создает данные

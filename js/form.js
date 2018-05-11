@@ -10,28 +10,35 @@
   var picturePreview = document.querySelector('.upload-form-preview');
   var pictureEffectPreviews = document.querySelectorAll('.upload-effect-preview');
   var picturePreviewImage = picturePreview.querySelector('img');
+  var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
 
-  var openUploadPopup = function (e) {
-    var file = e.target.files[0];
-    var readerFile = new FileReader();
-
-    readerFile.addEventListener('loadend', function () {
-      picturePreviewImage.src = readerFile.result;
-      for (var i = 0; i < pictureEffectPreviews.length; i++) {
-        pictureEffectPreviews[i].style.backgroundImage = 'url(' + readerFile.result + ')';
-      }
+  var openUploadPopup = function () {
+    var file = uploadFileForm.files[0];
+    var fileName = file.name.toLowerCase();
+    var matches = FILE_TYPES.some(function (it) { // или в разметке использовать accept с типами файлов <input type="file" name="photo" multiple accept="image/*,image/jpeg">
+      return fileName.endsWith(it);
     });
 
-    if (file) {
-      readerFile.readAsDataURL(file);
+    if (matches) {
+      var readerFile = new FileReader();
 
-    } else {
-      picturePreviewImage.src = '';
+      readerFile.addEventListener('load', function () {
+        picturePreviewImage.src = readerFile.result;
+        for (var i = 0; i < pictureEffectPreviews.length; i++) {
+          pictureEffectPreviews[i].style.backgroundImage = 'url(' + readerFile.result + ')';
+        }
+      });
+
+      if (file) {
+        readerFile.readAsDataURL(file);
+
+      } else {
+        picturePreviewImage.src = '';
+      }
+
+      uploadPopup.classList.remove('hidden');
+      document.addEventListener('keydown', uploadPopupCloseEscHandler);
     }
-
-    uploadPopup.classList.remove('hidden');
-    document.addEventListener('keydown', uploadPopupCloseEscHandler);
-    return picturePreviewImage;
   };
 
   var closeUploadPopup = function () {
@@ -41,15 +48,15 @@
   };
 
   var uploadPopupCloseEscHandler = function (evt) {
-    if (evt.keyCode === window.data.ESC_KEYCODE) {
-      if (document.activeElement !== uploadFormDescription) {
+    if (evt.keyCode === window.date.ESC_KEYCODE) {
+      if (document.activeElement !== uploadFormDescription) { // document.activeElement - активный элемент на котором стоит курсор
         closeUploadPopup();
       }
     }
   };
 
-  uploadFileForm.addEventListener('change', function (evt) {
-    openUploadPopup(evt);
+  uploadFileForm.addEventListener('change', function () {
+    openUploadPopup();
   });
 
   uploadCloser.addEventListener('click', function () {
@@ -88,6 +95,8 @@
     changePictureSize();
   });
 
+// Слайдер
+
   // Наложение эффекта на изображение
   // Изменение глубины эффекта перетаскиванием бегунка слайдера
 
@@ -97,7 +106,8 @@
   var effectLevelLine = uploadEffectControlsValue.querySelector('.upload-effect-level-line');
   var effectLevelValue = uploadEffectControlsValue.querySelector('.upload-effect-level-val');
   var effectLevelPin = uploadEffectControlsValue.querySelector('.upload-effect-level-pin');
-  var lineEffectCoords = effectLevelLine.getBoundingClientRect();
+  var LEVEL_LINE_LENGTH = effectLevelLine.offsetWidth;
+
   var imagePreviewProperties = {
     'effect-chrome': {
       effect: 'grayscale',
@@ -135,6 +145,7 @@
     uploadEffectControlsValue.hidden = true;
     picturePreviewImage.removeAttribute('style');
   };
+
   var setUploadEffectHandler = function (effect) {
     changePreviewClass();
     if (effect !== 'effect-none') {
@@ -165,33 +176,49 @@
     picturePreviewImage.style.filter = imagePreviewProperties[previewImageClassName].effect + '(' + effectValue + effectUnit + ')';
   };
 
-  var mouseMoveHandler = function (evtMove) {
-    evtMove.preventDefault();
-    if (evtMove.clientX >= lineEffectCoords.left && evtMove.clientX <= lineEffectCoords.right) {
-      var shift = (evtMove.clientX - lineEffectCoords.left) * 100 / (lineEffectCoords.right - lineEffectCoords.left);
-      effectLevelPin.style.left = shift + '%';
-      effectLevelValue.style.width = shift + '%';
-      applyEffectLevelPreviewPicture(shift / 100);
+effectLevelPin.addEventListener('mousedown', function (evt) {
+  evt.preventDefault();
+  console.log(effectLevelLine.offsetLeft);
+  console.log(effectLevelLine.offsetWidth);
+  var startCoords = evt.clientX;
+
+  var mouseMoveHandler = function (moveEvt) {
+    moveEvt.preventDefault();
+
+    var shift = startCoords - moveEvt.clientX;
+    startCoords = moveEvt.clientX;
+    var deferencePin = (effectLevelPin.offsetLeft - shift) / LEVEL_LINE_LENGTH;
+    if (deferencePin < 0) {
+      deferencePin = 0;
+    } else if (deferencePin > 1) {
+      deferencePin = 1;
     }
+    effectLevelPin.style.left = deferencePin * 100 + '%';
+    effectLevelValue.style.width = deferencePin * 100 + '%';
+    applyEffectLevelPreviewPicture(deferencePin);
   };
 
-  var mouseUpHandler = function (evtUp) {
-    evtUp.preventDefault();
+  var mouseUpHandler = function (upEvt) {
+    upEvt.preventDefault();
+
     document.removeEventListener('mousemove', mouseMoveHandler);
     document.removeEventListener('mouseup', mouseUpHandler);
   };
 
-  effectLevelPin.addEventListener('mousedown', function (evt) {
-    evt.preventDefault();
-    document.addEventListener('mousemove', mouseMoveHandler);
-    document.addEventListener('mouseup', mouseUpHandler);
-  });
+  document.addEventListener('mousemove', mouseMoveHandler);
+  document.addEventListener('mouseup', mouseUpHandler);
+});
 
-  effectLevelLine.addEventListener('mousedown', function (evt) {
-    evt.preventDefault();
-    mouseMoveHandler(evt);
-    document.addEventListener('mouseup', mouseUpHandler);
-  });
+effectLevelLine.addEventListener('mousedown', function (evt) {
+  evt.preventDefault();
+
+  var box = elem.getBoundingClientRect();
+  console.log('box.left' + box.left);
+  box.left
+  getCoords(effectLevelLine);
+  applyEffectLevelPreviewPicture (evt.clientX / LEVEL_LINE_LENGTH);
+
+});
 
   // Валидация хэштэгов
 
@@ -263,3 +290,4 @@
     window.backend.save(new FormData(uploadForm), saveFormData, window.date.onError);
   });
 })();
+

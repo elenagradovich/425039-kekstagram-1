@@ -2,7 +2,9 @@
 
 (function () {
   var url = 'https://js.dump.academy/kekstagram';
+  /*var CODE = {
 
+  };*/
   var loadData = function (onLoad, onError) {
     var xhr = new XMLHttpRequest();
     xhr.responseType = 'json'; // браузер произведет необходимую трансформацию данных сам
