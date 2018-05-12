@@ -106,7 +106,7 @@
   var effectLevelLine = uploadEffectControlsValue.querySelector('.upload-effect-level-line');
   var effectLevelValue = uploadEffectControlsValue.querySelector('.upload-effect-level-val');
   var effectLevelPin = uploadEffectControlsValue.querySelector('.upload-effect-level-pin');
-  var LEVEL_LINE_LENGTH = effectLevelLine.offsetWidth;
+
 
   var imagePreviewProperties = {
     'effect-chrome': {
@@ -176,49 +176,48 @@
     picturePreviewImage.style.filter = imagePreviewProperties[previewImageClassName].effect + '(' + effectValue + effectUnit + ')';
   };
 
-effectLevelPin.addEventListener('mousedown', function (evt) {
-  evt.preventDefault();
-  console.log(effectLevelLine.offsetLeft);
-  console.log(effectLevelLine.offsetWidth);
-  var startCoords = evt.clientX;
-
-  var mouseMoveHandler = function (moveEvt) {
-    moveEvt.preventDefault();
-
-    var shift = startCoords - moveEvt.clientX;
-    startCoords = moveEvt.clientX;
-    var deferencePin = (effectLevelPin.offsetLeft - shift) / LEVEL_LINE_LENGTH;
-    if (deferencePin < 0) {
-      deferencePin = 0;
-    } else if (deferencePin > 1) {
-      deferencePin = 1;
-    }
-    effectLevelPin.style.left = deferencePin * 100 + '%';
-    effectLevelValue.style.width = deferencePin * 100 + '%';
-    applyEffectLevelPreviewPicture(deferencePin);
+  var renderLevelValue = function (shift) {
+    effectLevelPin.style.left = shift * 100 + '%';
+    effectLevelValue.style.width = shift * 100 + '%';
+    applyEffectLevelPreviewPicture(shift);
   };
 
-  var mouseUpHandler = function (upEvt) {
-    upEvt.preventDefault();
+  effectLevelPin.addEventListener('mousedown', function (evt) {
+    evt.preventDefault();
+    var startCoords = evt.clientX;
 
-    document.removeEventListener('mousemove', mouseMoveHandler);
-    document.removeEventListener('mouseup', mouseUpHandler);
-  };
+    var mouseMoveHandler = function (moveEvt) {
+      var levelLineLenght = effectLevelLine.offsetWidth;
+      moveEvt.preventDefault();
 
-  document.addEventListener('mousemove', mouseMoveHandler);
-  document.addEventListener('mouseup', mouseUpHandler);
-});
+      var shift = startCoords - moveEvt.clientX;
+      startCoords = moveEvt.clientX;
+      var deferencePin = (effectLevelPin.offsetLeft - shift) / levelLineLenght;
+      if (deferencePin < 0) {
+        deferencePin = 0;
+      } else if (deferencePin > 1) {
+        deferencePin = 1;
+      }
+      renderLevelValue(deferencePin);
+    };
 
-effectLevelLine.addEventListener('mousedown', function (evt) {
-  evt.preventDefault();
+    var mouseUpHandler = function (upEvt) {
+      upEvt.preventDefault();
 
-  var box = elem.getBoundingClientRect();
-  console.log('box.left' + box.left);
-  box.left
-  getCoords(effectLevelLine);
-  applyEffectLevelPreviewPicture (evt.clientX / LEVEL_LINE_LENGTH);
+      document.removeEventListener('mousemove', mouseMoveHandler);
+      document.removeEventListener('mouseup', mouseUpHandler);
+    };
 
-});
+    document.addEventListener('mousemove', mouseMoveHandler);
+    document.addEventListener('mouseup', mouseUpHandler);
+  });
+
+  effectLevelLine.addEventListener('mousedown', function (evt) {
+    evt.preventDefault();
+    var box = effectLevelLine.getBoundingClientRect();
+    var deferencePin = (evt.clientX - box.left) / effectLevelLine.offsetWidth;
+    renderLevelValue(deferencePin);
+  });
 
   // Валидация хэштэгов
 
