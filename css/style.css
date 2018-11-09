@@ -304,6 +304,8 @@ body {
 }
 
 .effect-image-preview {
+  width: 470px;
+  height: auto;
   vertical-align: middle;
 }
 
